@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
 
@@ -22,7 +25,30 @@ func main() {
 
 	defer logFile.Close()
 
-	OpenWebsocketAndRegisterPlugin()
+	// Define flags
+	port := flag.String("port", "", "WebSocket port")
+	pluginUUID := flag.String("pluginUUID", "", "Plugin UUID")
+	registerEvent := flag.String("registerEvent", "", "Event to register")
+	info := flag.String("info", "", "Stream Deck information")
+
+	flag.Parse()
+
+	// Parse the info JSON
+	var sdInfo StreamDeckInfo
+	if err := json.Unmarshal([]byte(*info), &sdInfo); err != nil {
+		log.Fatalf("Error parsing info JSON: %v", err)
+	}
+
+	PluginConfig = PluginConfigType{
+		Port:          *port,
+		PluginUUID:    *pluginUUID,
+		RegisterEvent: *registerEvent,
+		Info:          sdInfo,
+	}
+
+	log.Printf("%#v", PluginConfig)
+
+	// OpenWebsocketAndRegisterPlugin()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -31,6 +57,26 @@ func main() {
 		BaseAction: BaseAction{UUID: "com.emilyxfox.counter.counter"},
 	}
 	RegisterAction(exampleAction)
+
+	u := url.URL{Scheme: "ws", Host: "127.0.0.1:" + PluginConfig.Port, Path: "/"}
+	log.Printf("Connecting to %s", u.String())
+
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		log.Fatalf("Error connecting to WebSocket: %v", err)
+	}
+	defer c.Close()
+
+	WsClient = c
+
+	registerMessage := map[string]string{
+		"event": PluginConfig.RegisterEvent,
+		"uuid":  PluginConfig.PluginUUID,
+	}
+
+	if err := c.WriteJSON(registerMessage); err != nil {
+		log.Fatalf("Error sending register message: %v", err)
+	}
 
 	// Listen for messages from WebSocket
 	go func() {
