@@ -166,3 +166,16 @@ func DispatchEvent(event StreamDeckEvent) {
 		}
 	}
 }
+
+func HandleEvent(data []byte) {
+	event, err := ParseEvent(data)
+	if err != nil {
+		log.Printf("Error parsing event: %v", err)
+		return
+	}
+
+	e := event.GetEventType()
+	log.Printf("Received event: %s", e)
+
+	DispatchEvent(event)
+}
