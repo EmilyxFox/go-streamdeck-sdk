@@ -12,7 +12,7 @@ type MyCounterAction struct {
 }
 
 var CounterAction = &MyCounterAction{
-	ActionConfig: streamdeck.ActionConfig{UUID: "com.emilyxfox.counter.counter"},
+	ActionConfig: streamdeck.ActionConfig{UUID: "tld.domain.counterplugin.counteraction"},
 }
 
 var counter uint32
