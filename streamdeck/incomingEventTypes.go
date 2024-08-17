@@ -53,7 +53,8 @@ func (e *ActionAssociatedEvent) GetAction() (string, bool) {
 //	}
 //	e.SetSettings(newSettings)
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#setsettings
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#setsettings
 func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
 	response := map[string]interface{}{
 		"event":   "setSettings",
@@ -69,7 +70,8 @@ func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
 //
 //	e.GetSettings()
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#getsettings
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#getsettings
 func (e *ActionAssociatedEvent) GetSettings() error {
 	response := map[string]string{
 		"event":   "getSettings",
@@ -92,7 +94,8 @@ func (e *ActionAssociatedEvent) GetSettings() error {
 //	}
 //	e.setGlobalSettings(newSettings)
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#setglobalsettings
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#setglobalsettings
 // func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error {		//THIS CONTEXT IS DIFFERENT
 // 	response := map[string]interface{}{
 // 		"event":   "setGlobalSettings",
@@ -123,7 +126,8 @@ func (e *ActionAssociatedEvent) GetSettings() error {
 //
 //	e.OpenUrl("https://www.example.com")
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#openurl
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#openurl
 func (e *ActionAssociatedEvent) OpenUrl(url string) error {
 	response := map[string]interface{}{
 		"event": "openUrl",
@@ -165,7 +169,8 @@ func (e *ActionAssociatedEvent) LogMessage(message string) error {
 //	e.SetTitle("New Title", 1)             // Specified target, default state
 //	e.SetTitle("New Title", 1, 2)          // Specified target and state
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#settitle
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#settitle
 func (e *ActionAssociatedEvent) SetTitle(title string, options ...uint8) error {
 	var target, state uint8 = 0, 0
 
@@ -194,7 +199,8 @@ func (e *ActionAssociatedEvent) SetTitle(title string, options ...uint8) error {
 //
 //	e.SetImage("Button was clicked!")
 //
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#setimage
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#setimage
 func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) error {
 	var target, state uint8 = 0, 0
 
