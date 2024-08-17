@@ -6,7 +6,11 @@ import (
 )
 
 type ExampleAction struct {
-	BaseAction
+	ActionConfig
+}
+
+var CounterAction = &ExampleAction{
+	ActionConfig: ActionConfig{UUID: "com.emilyxfox.counter.counter"},
 }
 
 var counter uint32

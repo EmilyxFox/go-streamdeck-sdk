@@ -53,10 +53,7 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	exampleAction := &ExampleAction{
-		BaseAction: BaseAction{UUID: "com.emilyxfox.counter.counter"},
-	}
-	RegisterAction(exampleAction)
+	RegisterAction(CounterAction)
 
 	u := url.URL{Scheme: "ws", Host: "127.0.0.1:" + PluginConfig.Port, Path: "/"}
 	log.Printf("Connecting to %s", u.String())

@@ -4,11 +4,11 @@ type Action interface {
 	GetUUID() string
 }
 
-type BaseAction struct {
+type ActionConfig struct {
 	UUID string
 }
 
-func (a *BaseAction) GetUUID() string {
+func (a *ActionConfig) GetUUID() string {
 	return a.UUID
 }
 
