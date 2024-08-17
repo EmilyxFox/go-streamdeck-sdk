@@ -46,7 +46,7 @@ func StartPlugin() {
 		Info:          sdInfo,
 	}
 
-	log.Printf("%#v", PluginConfig)
+	log.Printf("%+v", PluginConfig)
 
 	// OpenWebsocketAndRegisterPlugin()
 

@@ -27,6 +27,6 @@ func SendEventToStreamDeck(response interface{}) error {
 	if WsClient == nil {
 		return fmt.Errorf("WebSocket client is not initialised")
 	}
-	log.Println("Sending response:", response)
+	log.Println("SD <-", response)
 	return WsClient.WriteJSON(response)
 }

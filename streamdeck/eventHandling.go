@@ -29,7 +29,6 @@ func DispatchEvent(event StreamDeckEvent) {
 					handler.HandleDidReceiveSettings(e)
 				}
 			case *KeyDownEvent:
-				log.Print("KeyDownEvent")
 				if handler, ok := action.(interface {
 					HandleKeyDown(*KeyDownEvent)
 				}); ok {
@@ -175,7 +174,7 @@ func HandleEvent(data []byte) {
 	}
 
 	e := event.GetEventType()
-	log.Printf("Received event: %s", e)
+	log.Printf("SD -> %s", e)
 
 	DispatchEvent(event)
 }
