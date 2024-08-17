@@ -1,4 +1,4 @@
-package main
+package streamdeck
 
 type SetSettingsEvent struct {
 	Event   string         `json:"event"`

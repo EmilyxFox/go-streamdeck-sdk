@@ -1,4 +1,4 @@
-module github.com/emilyxfox/go-streamdeck-plugin
+module github.com/emilyxfox/go-streamdeck-sdk
 
 go 1.23.0
 

@@ -1,4 +1,4 @@
-package main
+package streamdeck
 
 type Action interface {
 	GetUUID() string

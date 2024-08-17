@@ -1,4 +1,4 @@
-package main
+package streamdeck
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 
 var actionRegistry = make(map[string]Action)
 
-func main() {
+func StartPlugin() {
 	// Open log file
 	logFile, err := os.OpenFile("streamdeck.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -53,7 +53,7 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	RegisterAction(CounterAction)
+	// RegisterAction(CounterAction)
 
 	u := url.URL{Scheme: "ws", Host: "127.0.0.1:" + PluginConfig.Port, Path: "/"}
 	log.Printf("Connecting to %s", u.String())
