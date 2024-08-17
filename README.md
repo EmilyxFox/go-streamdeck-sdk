@@ -31,7 +31,7 @@ import (
 )
 
 type MyCounterAction struct {
-	streamdeck.BaseAction
+	streamdeck.ActionConfig
 }
 
 var counter uint32
@@ -63,7 +63,7 @@ import (
 func main() {
 	// Create and register your custom action
 	action := &MyCounterAction{
-		BaseAction: streamdeck.BaseAction{UUID: "com.emilyxfox.counter.counter"},
+		ActionConfig: streamdeck.ActionConfig{UUID: "com.emilyxfox.counter.counter"},
 	}
 	streamdeck.RegisterAction(action)
 
