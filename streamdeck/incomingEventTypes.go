@@ -96,14 +96,14 @@ func (e *ActionAssociatedEvent) GetSettings() error {
 //
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setglobalsettings
-// func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error {		//THIS CONTEXT IS DIFFERENT
-// 	response := map[string]interface{}{
-// 		"event":   "setGlobalSettings",
-// 		"context": e.Context,
-// 		"payload": settings,
-// 	}
-// 	return SendEventToStreamDeck(response)
-// }
+func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error {
+	response := map[string]interface{}{
+		"event":   "setGlobalSettings",
+		"context": PluginConfig.PluginUUID,
+		"payload": settings,
+	}
+	return SendEventToStreamDeck(response)
+}
 
 // Request the persistent global data:
 //
@@ -112,13 +112,13 @@ func (e *ActionAssociatedEvent) GetSettings() error {
 //	e.GetGlobalSettings()
 //
 // Docs: https://docs.elgato.com/sdk/plugins/events-sent#getglobalsettings
-// func (e *ActionAssociatedEvent) GetGlobalSettings() error {
-// 	response := map[string]string{
-// 		"event":   "getGlobalSettings",
-// 		"context": e.Context,
-// 	}
-// 	return SendEventToStreamDeck(response)
-// }
+func (e *ActionAssociatedEvent) GetGlobalSettings() error {
+	response := map[string]string{
+		"event":   "getGlobalSettings",
+		"context": PluginConfig.PluginUUID,
+	}
+	return SendEventToStreamDeck(response)
+}
 
 // Tell the Stream Deck application to open an URL in the default browser:
 //
