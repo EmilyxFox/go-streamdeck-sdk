@@ -56,10 +56,10 @@ func (e *ActionAssociatedEvent) GetAction() (string, bool) {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setsettings
 func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
-	response := map[string]interface{}{
-		"event":   "setSettings",
-		"context": e.Context,
-		"payload": settings,
+	response := SetSettingsEvent{
+		Event:   "setSettings",
+		Context: e.Context,
+		Payload: settings,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -73,9 +73,9 @@ func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#getsettings
 func (e *ActionAssociatedEvent) GetSettings() error {
-	response := map[string]string{
-		"event":   "getSettings",
-		"context": e.Context,
+	response := GetSettingsEvent{
+		Event:   "getSettings",
+		Context: e.Context,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -97,10 +97,10 @@ func (e *ActionAssociatedEvent) GetSettings() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setglobalsettings
 func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error {
-	response := map[string]interface{}{
-		"event":   "setGlobalSettings",
-		"context": PluginConfig.PluginUUID,
-		"payload": settings,
+	response := SetGlobalSettingsEvent{
+		Event:   "setGlobalSettings",
+		Context: PluginConfig.PluginUUID,
+		Payload: settings,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -113,9 +113,9 @@ func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error
 //
 // Docs: https://docs.elgato.com/sdk/plugins/events-sent#getglobalsettings
 func (e *ActionAssociatedEvent) GetGlobalSettings() error {
-	response := map[string]string{
-		"event":   "getGlobalSettings",
-		"context": PluginConfig.PluginUUID,
+	response := GetGlobalSettingsEvent{
+		Event:   "getGlobalSettings",
+		Context: PluginConfig.PluginUUID,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -129,10 +129,12 @@ func (e *ActionAssociatedEvent) GetGlobalSettings() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#openurl
 func (e *ActionAssociatedEvent) OpenUrl(url string) error {
-	response := map[string]interface{}{
-		"event": "openUrl",
-		"payload": map[string]interface{}{
-			"url": url,
+	response := OpenUrlEvent{
+		Event: "openUrl",
+		Payload: struct {
+			Url string "json:\"url\""
+		}{
+			Url: url,
 		},
 	}
 	return SendEventToStreamDeck(response)
@@ -147,10 +149,12 @@ func (e *ActionAssociatedEvent) OpenUrl(url string) error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#logmessage
 func (e *ActionAssociatedEvent) LogMessage(message string) error {
-	response := map[string]interface{}{
-		"event": "logMessage",
-		"payload": map[string]interface{}{
-			"message": message,
+	response := LogMessageEvent{
+		Event: "logMessage",
+		Payload: struct {
+			Message string "json:\"message\""
+		}{
+			Message: message,
 		},
 	}
 	return SendEventToStreamDeck(response)
@@ -181,13 +185,17 @@ func (e *ActionAssociatedEvent) SetTitle(title string, options ...uint8) error {
 		state = options[1]
 	}
 
-	response := map[string]interface{}{
-		"event":   "setTitle",
-		"context": e.Context,
-		"payload": map[string]interface{}{
-			"title":  title,
-			"target": target,
-			"state":  state,
+	response := SetTitleEvent{
+		Event:   "setTitle",
+		Context: e.Context,
+		Payload: struct {
+			Title  string "json:\"title\""
+			Target uint8  "json:\"target\""
+			State  uint8  "json:\"state\""
+		}{
+			Title:  title,
+			Target: target,
+			State:  state,
 		},
 	}
 	return SendEventToStreamDeck(response)
@@ -211,13 +219,17 @@ func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) e
 		state = options[1]
 	}
 
-	response := map[string]interface{}{
-		"event":   "setImage",
-		"context": e.Context,
-		"payload": map[string]interface{}{
-			"image":  base64image,
-			"target": target,
-			"state":  state,
+	response := SetImageEvent{
+		Event:   "setImage",
+		Context: e.Context,
+		Payload: struct {
+			Image  string "json:\"image\""
+			Target uint8  "json:\"target\""
+			State  uint8  "json:\"state\""
+		}{
+			Image:  base64image,
+			Target: target,
+			State:  state,
 		},
 	}
 	return SendEventToStreamDeck(response)
@@ -238,9 +250,9 @@ func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) e
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#showalert
 func (e *ActionAssociatedEvent) ShowAlert() error {
-	response := map[string]interface{}{
-		"event":   "showAlert",
-		"context": e.Context,
+	response := ShowAlertEvent{
+		Event:   "showAlert",
+		Context: e.Context,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -254,9 +266,9 @@ func (e *ActionAssociatedEvent) ShowAlert() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#showok
 func (e *ActionAssociatedEvent) ShowOk() error {
-	response := map[string]interface{}{
-		"event":   "showOk",
-		"context": e.Context,
+	response := ShowOkEvent{
+		Event:   "showOk",
+		Context: e.Context,
 	}
 	return SendEventToStreamDeck(response)
 }
@@ -270,11 +282,13 @@ func (e *ActionAssociatedEvent) ShowOk() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setstate
 func (e *ActionAssociatedEvent) SetState(state uint8) error {
-	response := map[string]interface{}{
-		"event":   "setState",
-		"context": e.Context,
-		"payload": map[string]interface{}{
-			"state": state,
+	response := SetStateEvent{
+		Event:   "setState",
+		Context: e.Context,
+		Payload: struct {
+			State uint8 "json:\"state\""
+		}{
+			State: state,
 		},
 	}
 	return SendEventToStreamDeck(response)
@@ -289,23 +303,26 @@ func (e *ActionAssociatedEvent) SetState(state uint8) error {
 //
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#switchtoprofile
-// func (e *ActionAssociatedEvent) SwitchToProfile(profile string, page ...uint8) error {
-// 	var pageIndex uint8 = 0
+func (e *ActionAssociatedEvent) SwitchToProfile(profile string, page ...uint8) error {
+	var pageIndex uint8 = 0
 
-// 	if len(page) > 0 {
-// 		pageIndex = page[0]
-// 	}
-// 	response := map[string]interface{}{
-// 		"event":   "switchToProfile",
-// 		"context": e.Context, //PLUGINUUID
-// 		"device":  e.Device,
-// 		"payload": map[string]interface{}{
-// 			"profile": profile,
-// 			"page":    pageIndex,
-// 		},
-// 	}
-// 	return SendEventToStreamDeck(response)
-// }
+	if len(page) > 0 {
+		pageIndex = page[0]
+	}
+	response := SwitchToProfileEvent{
+		Event:   "switchToProfile",
+		Context: PluginConfig.PluginUUID,
+		Device:  e.Device,
+		Payload: struct {
+			Profile string "json:\"profile\""
+			Page    uint8  "json:\"page\""
+		}{
+			Profile: profile,
+			Page:    pageIndex,
+		},
+	}
+	return SendEventToStreamDeck(response)
+}
 
 // Send a payload to the Property Inspector:
 //
@@ -318,11 +335,11 @@ func (e *ActionAssociatedEvent) SetState(state uint8) error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#sendtopropertyinspector
 func (e *ActionAssociatedEvent) SendToPropertyInspector(payload map[string]any) error {
-	response := map[string]interface{}{
-		"event":   "setState",
-		"action":  e.Action,
-		"context": e.Context,
-		"payload": payload,
+	response := SendToPropertyInspectorFromPluginEvent{
+		Event:   "setState",
+		Action:  e.Action,
+		Context: e.Context,
+		Payload: payload,
 	}
 	return SendEventToStreamDeck(response)
 }
