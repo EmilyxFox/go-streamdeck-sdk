@@ -1,5 +1,10 @@
 package streamdeck
 
+import (
+	"fmt"
+	"time"
+)
+
 type StreamDeckEvent interface {
 	GetEventType() string
 	IsActionAssociated() bool
@@ -15,6 +20,10 @@ type ActionAssociatedEvent struct {
 type GlobalEvent struct {
 	Event  string `json:"event"`
 	Device string `json:"device,omitempty"`
+}
+
+func (e *ActionAssociatedEvent) GetContext() string {
+	return e.Context
 }
 
 func (e *ActionAssociatedEvent) GetEventType() string {
@@ -72,12 +81,28 @@ func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
 //
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#getsettings
-func (e *ActionAssociatedEvent) GetSettings() error {
+func (e *ActionAssociatedEvent) GetSettings() (ActionSettings, error) {
+	ch := registerResponseChannel(e.Context)
+	defer unregisterResponseChannel(e.Context)
+
 	response := GetSettingsEvent{
 		Event:   "getSettings",
 		Context: e.Context,
 	}
-	return SendEventToStreamDeck(response)
+	err := SendEventToStreamDeck(response)
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case event := <-ch:
+		if settingsEvent, ok := event.(*DidReceiveSettingsEvent); ok {
+			return settingsEvent.Payload.Settings, nil
+		}
+		return nil, fmt.Errorf("unexpected response type")
+	case <-time.After(5 * time.Second):
+		return nil, fmt.Errorf("timeout waiting for settings")
+	}
 }
 
 // The plugin and Property Inspector can save persistent data globally. The data will be saved securely
@@ -112,12 +137,28 @@ func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error
 //	e.GetGlobalSettings()
 //
 // Docs: https://docs.elgato.com/sdk/plugins/events-sent#getglobalsettings
-func (e *ActionAssociatedEvent) GetGlobalSettings() error {
+func (e *ActionAssociatedEvent) GetGlobalSettings() (GlobalSettings, error) {
+	ch := registerResponseChannel(PluginConfig.PluginUUID)
+	defer unregisterResponseChannel(PluginConfig.PluginUUID)
+
 	response := GetGlobalSettingsEvent{
 		Event:   "getGlobalSettings",
 		Context: PluginConfig.PluginUUID,
 	}
-	return SendEventToStreamDeck(response)
+	err := SendEventToStreamDeck(response)
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case event := <-ch:
+		if settingsEvent, ok := event.(*DidReceiveGlobalSettingsEvent); ok {
+			return settingsEvent.Payload.Settings, nil
+		}
+		return nil, fmt.Errorf("unexpected response type")
+	case <-time.After(5 * time.Second):
+		return nil, fmt.Errorf("timeout waiting for global settings")
+	}
 }
 
 // Tell the Stream Deck application to open an URL in the default browser:

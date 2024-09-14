@@ -26,5 +26,3 @@ func (a *MyCounterAction) HandleKeyDown(event *streamdeck.KeyDownEvent) {
 func (a *MyCounterAction) HandleWillAppear(event *streamdeck.WillAppearEvent) {
 	event.SetTitle(strconv.FormatUint(uint64(counter), 10))
 }
-
-// More actions can be defined similarly...

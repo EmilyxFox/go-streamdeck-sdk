@@ -176,5 +176,12 @@ func HandleEvent(data []byte) {
 	e := event.GetEventType()
 	log.Printf("SD -> %s", e)
 
-	DispatchEvent(event)
+	switch ev := event.(type) {
+	case *DidReceiveSettingsEvent:
+		go sendResponse(ev.GetContext(), ev)
+	case *DidReceiveGlobalSettingsEvent:
+		go sendResponse(PluginConfig.PluginUUID, ev)
+	}
+
+	go DispatchEvent(event)
 }
