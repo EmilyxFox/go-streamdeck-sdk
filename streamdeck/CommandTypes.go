@@ -65,7 +65,7 @@ func (e *ActionAssociatedEvent) GetAction() (string, bool) {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setsettings
 func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
-	response := SetSettingsEvent{
+	response := SetSettingsCommand{
 		Event:   "setSettings",
 		Context: e.Context,
 		Payload: settings,
@@ -85,7 +85,7 @@ func (e *ActionAssociatedEvent) GetSettings() (ActionSettings, error) {
 	ch := registerResponseChannel(e.Context)
 	defer unregisterResponseChannel(e.Context)
 
-	response := GetSettingsEvent{
+	response := GetSettingsCommand{
 		Event:   "getSettings",
 		Context: e.Context,
 	}
@@ -122,7 +122,7 @@ func (e *ActionAssociatedEvent) GetSettings() (ActionSettings, error) {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setglobalsettings
 func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error {
-	response := SetGlobalSettingsEvent{
+	response := SetGlobalSettingsCommand{
 		Event:   "setGlobalSettings",
 		Context: PluginConfig.PluginUUID,
 		Payload: settings,
@@ -141,7 +141,7 @@ func (e *ActionAssociatedEvent) GetGlobalSettings() (GlobalSettings, error) {
 	ch := registerResponseChannel(PluginConfig.PluginUUID)
 	defer unregisterResponseChannel(PluginConfig.PluginUUID)
 
-	response := GetGlobalSettingsEvent{
+	response := GetGlobalSettingsCommand{
 		Event:   "getGlobalSettings",
 		Context: PluginConfig.PluginUUID,
 	}
@@ -170,7 +170,7 @@ func (e *ActionAssociatedEvent) GetGlobalSettings() (GlobalSettings, error) {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#openurl
 func (e *ActionAssociatedEvent) OpenUrl(url string) error {
-	response := OpenUrlEvent{
+	response := OpenUrlCommand{
 		Event: "openUrl",
 		Payload: struct {
 			Url string "json:\"url\""
@@ -190,7 +190,7 @@ func (e *ActionAssociatedEvent) OpenUrl(url string) error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#logmessage
 func (e *ActionAssociatedEvent) LogMessage(message string) error {
-	response := LogMessageEvent{
+	response := LogMessageCommand{
 		Event: "logMessage",
 		Payload: struct {
 			Message string "json:\"message\""
@@ -226,7 +226,7 @@ func (e *ActionAssociatedEvent) SetTitle(title string, options ...uint8) error {
 		state = options[1]
 	}
 
-	response := SetTitleEvent{
+	response := SetTitleCommand{
 		Event:   "setTitle",
 		Context: e.Context,
 		Payload: struct {
@@ -260,7 +260,7 @@ func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) e
 		state = options[1]
 	}
 
-	response := SetImageEvent{
+	response := SetImageCommand{
 		Event:   "setImage",
 		Context: e.Context,
 		Payload: struct {
@@ -291,7 +291,7 @@ func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) e
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#showalert
 func (e *ActionAssociatedEvent) ShowAlert() error {
-	response := ShowAlertEvent{
+	response := ShowAlertCommand{
 		Event:   "showAlert",
 		Context: e.Context,
 	}
@@ -307,7 +307,7 @@ func (e *ActionAssociatedEvent) ShowAlert() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#showok
 func (e *ActionAssociatedEvent) ShowOk() error {
-	response := ShowOkEvent{
+	response := ShowOkCommand{
 		Event:   "showOk",
 		Context: e.Context,
 	}
@@ -323,7 +323,7 @@ func (e *ActionAssociatedEvent) ShowOk() error {
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#setstate
 func (e *ActionAssociatedEvent) SetState(state uint8) error {
-	response := SetStateEvent{
+	response := SetStateCommand{
 		Event:   "setState",
 		Context: e.Context,
 		Payload: struct {
@@ -350,7 +350,7 @@ func (e *ActionAssociatedEvent) SwitchToProfile(profile string, page ...uint8) e
 	if len(page) > 0 {
 		pageIndex = page[0]
 	}
-	response := SwitchToProfileEvent{
+	response := SwitchToProfileCommand{
 		Event:   "switchToProfile",
 		Context: PluginConfig.PluginUUID,
 		Device:  e.Device,
@@ -376,9 +376,8 @@ func (e *ActionAssociatedEvent) SwitchToProfile(profile string, page ...uint8) e
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#sendtopropertyinspector
 func (e *ActionAssociatedEvent) SendToPropertyInspector(payload map[string]any) error {
-	response := SendToPropertyInspectorFromPluginEvent{
-		Event:   "setState",
-		Action:  e.Action,
+	response := SendToPropertyInspectorFromPluginCommand{
+		Event:   "sendToPropertyInspector",
 		Context: e.Context,
 		Payload: payload,
 	}

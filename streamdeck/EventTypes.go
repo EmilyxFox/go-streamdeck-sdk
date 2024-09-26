@@ -1,42 +1,42 @@
 package streamdeck
 
-type SetSettingsEvent struct {
+type SetSettingsCommand struct {
 	Event   string         `json:"event"`
 	Context string         `json:"context"`
 	Payload map[string]any `json:"payload"`
 }
 
-type GetSettingsEvent struct {
+type GetSettingsCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 }
 
-type SetGlobalSettingsEvent struct {
+type SetGlobalSettingsCommand struct {
 	Event   string         `json:"event"`
 	Context string         `json:"context"`
 	Payload map[string]any `json:"payload"`
 }
 
-type GetGlobalSettingsEvent struct {
+type GetGlobalSettingsCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 }
 
-type OpenUrlEvent struct {
+type OpenUrlCommand struct {
 	Event   string `json:"event"`
 	Payload struct {
 		Url string `json:"url"`
 	} `json:"payload"`
 }
 
-type LogMessageEvent struct {
+type LogMessageCommand struct {
 	Event   string `json:"event"`
 	Payload struct {
 		Message string `json:"message"`
 	} `json:"payload"`
 }
 
-type SetTitleEvent struct {
+type SetTitleCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 	Payload struct {
@@ -46,7 +46,7 @@ type SetTitleEvent struct {
 	} `json:"payload"`
 }
 
-type SetImageEvent struct {
+type SetImageCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 	Payload struct {
@@ -79,17 +79,17 @@ type SetTriggerDescriptionEvent struct {
 	} `json:"payload"`
 }
 
-type ShowAlertEvent struct {
+type ShowAlertCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 }
 
-type ShowOkEvent struct {
+type ShowOkCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 }
 
-type SetStateEvent struct {
+type SetStateCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 	Payload struct {
@@ -97,7 +97,7 @@ type SetStateEvent struct {
 	} `json:"payload"`
 }
 
-type SwitchToProfileEvent struct {
+type SwitchToProfileCommand struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 	Device  string `json:"device"`
@@ -108,7 +108,7 @@ type SwitchToProfileEvent struct {
 }
 
 // Both of these events might not even be necessary
-type SendToPropertyInspectorFromPluginEvent struct { //Idk if this rename is a good idea
+type SendToPropertyInspectorFromPluginCommand struct { //Idk if this rename is a good idea
 	Action  string         `json:"action"`
 	Event   string         `json:"event"`
 	Context string         `json:"context"`
