@@ -50,34 +50,42 @@ func (e *ActionAssociatedEvent) GetAction() (string, bool) {
 	}
 }
 
-// Update settings associated with action
-//
-// Parameters:
-// - settings: A map[string]any which is persistently saved as a json for the action's instance.
+// Gets the global settings associated with the plugin. Causes DidReceiveGlobalSettings to be emitted.
 //
 // Usage:
 //
-//	newSettings := map[string]any{
-//		"apikey": "mX8ulcBHYmMniSshmB59"
-//	}
-//	e.SetSettings(newSettings)
+//	globalSettings, err := e.GetGlobalSettings()
 //
-// Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#setsettings
-func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
-	response := SetSettingsCommand{
-		Event:   "setSettings",
-		Context: e.Context,
-		Payload: settings,
+// Docs: https://docs.elgato.com/sdk/plugins/events-sent#getglobalsettings
+func (e *ActionAssociatedEvent) GetGlobalSettings() (GlobalSettings, error) {
+	ch := registerResponseChannel(PluginConfig.PluginUUID)
+	defer unregisterResponseChannel(PluginConfig.PluginUUID)
+
+	response := GetGlobalSettingsCommand{
+		Event:   "getGlobalSettings",
+		Context: PluginConfig.PluginUUID,
 	}
-	return SendEventToStreamDeck(response)
+	err := SendEventToStreamDeck(response)
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case event := <-ch:
+		if settingsEvent, ok := event.(*DidReceiveGlobalSettingsEvent); ok {
+			return settingsEvent.Payload.Settings, nil
+		}
+		return nil, fmt.Errorf("unexpected response type")
+	case <-time.After(5 * time.Second):
+		return nil, fmt.Errorf("timeout waiting for global settings")
+	}
 }
 
-// Request the persistent data stored for the action's instance:
+// Gets the settings associated with an instance of an action. Causes DidReceiveSettings to be emitted.
 //
 // Usage:
 //
-//	e.GetSettings()
+//	settings, err := e.GetSettings()
 //
 // Docs:
 // https://docs.elgato.com/sdk/plugins/events-sent#getsettings
@@ -105,6 +113,86 @@ func (e *ActionAssociatedEvent) GetSettings() (ActionSettings, error) {
 	}
 }
 
+// Logs a message to the file-system.
+//
+// Usage:
+//
+//	e.LogMessage("Button was clicked!")
+//
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#logmessage
+func (e *ActionAssociatedEvent) LogMessage(message string) error {
+	response := LogMessageCommand{
+		Event: "logMessage",
+		Payload: struct {
+			Message string "json:\"message\""
+		}{
+			Message: message,
+		},
+	}
+	return SendEventToStreamDeck(response)
+}
+
+// Opens the URL in the user's default browser.
+//
+// Usage:
+//
+//	e.OpenUrl("https://www.example.com")
+//
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#openurl
+func (e *ActionAssociatedEvent) OpenUrl(url string) error {
+	response := OpenUrlCommand{
+		Event: "openUrl",
+		Payload: struct {
+			Url string "json:\"url\""
+		}{
+			Url: url,
+		},
+	}
+	return SendEventToStreamDeck(response)
+}
+
+// Sends a message to the property inspector.
+//
+// Usage:
+//
+//	e.SetState(map[string]any{}{
+//		"arbitrary": "value",
+//	})
+//
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#sendtopropertyinspector
+func (e *ActionAssociatedEvent) SendToPropertyInspector(payload map[string]any) error {
+	response := SendToPropertyInspectorFromPluginCommand{
+		Event:   "sendToPropertyInspector",
+		Context: e.Context,
+		Payload: payload,
+	}
+	return SendEventToStreamDeck(response)
+}
+
+// Set's the feedback of an existing layout associated with an action instance.
+//
+// Usage:
+//
+// something
+//
+// Docs:
+// https://docs.elgato.com/streamdeck/sdk/references/websocket/plugin/#setfeedback
+// !! SetFeedback
+
+// Sets the layout associated with an action instance.
+//
+// Usage:
+//
+// something
+//
+// Docs:
+// https://docs.elgato.com/streamdeck/sdk/references/websocket/plugin/#setfeedbacklayout
+// !! SetFeedbackLayout
+
+// Update settings associated with action
 // The plugin and Property Inspector can save persistent data globally. The data will be saved securely
 // to the Keychain on macOS and the Credential Store on Windows. This API can be used to save tokens
 // that should be available to every action in the plugin.
@@ -130,78 +218,84 @@ func (e *ActionAssociatedEvent) SetGlobalSettings(settings map[string]any) error
 	return SendEventToStreamDeck(response)
 }
 
-// Request the persistent global data:
+// Sets the image associated with an action instance.
 //
 // Usage:
 //
-//	e.GetGlobalSettings()
-//
-// Docs: https://docs.elgato.com/sdk/plugins/events-sent#getglobalsettings
-func (e *ActionAssociatedEvent) GetGlobalSettings() (GlobalSettings, error) {
-	ch := registerResponseChannel(PluginConfig.PluginUUID)
-	defer unregisterResponseChannel(PluginConfig.PluginUUID)
-
-	response := GetGlobalSettingsCommand{
-		Event:   "getGlobalSettings",
-		Context: PluginConfig.PluginUUID,
-	}
-	err := SendEventToStreamDeck(response)
-	if err != nil {
-		return nil, err
-	}
-
-	select {
-	case event := <-ch:
-		if settingsEvent, ok := event.(*DidReceiveGlobalSettingsEvent); ok {
-			return settingsEvent.Payload.Settings, nil
-		}
-		return nil, fmt.Errorf("unexpected response type")
-	case <-time.After(5 * time.Second):
-		return nil, fmt.Errorf("timeout waiting for global settings")
-	}
-}
-
-// Tell the Stream Deck application to open an URL in the default browser:
-//
-// Usage:
-//
-//	e.OpenUrl("https://www.example.com")
+//	e.SetImage("Button was clicked!")
 //
 // Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#openurl
-func (e *ActionAssociatedEvent) OpenUrl(url string) error {
-	response := OpenUrlCommand{
-		Event: "openUrl",
+// https://docs.elgato.com/sdk/plugins/events-sent#setimage
+func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) error {
+	var target, state uint8 = 0, 0
+
+	if len(options) > 0 {
+		target = options[0]
+	}
+	if len(options) > 1 {
+		state = options[1]
+	}
+
+	response := SetImageCommand{
+		Event:   "setImage",
+		Context: e.Context,
 		Payload: struct {
-			Url string "json:\"url\""
+			Image  string "json:\"image\""
+			Target uint8  "json:\"target\""
+			State  uint8  "json:\"state\""
 		}{
-			Url: url,
+			Image:  base64image,
+			Target: target,
+			State:  state,
 		},
 	}
 	return SendEventToStreamDeck(response)
 }
 
-// Write a debug message to the logs file:
+// Sets the settings associated with an instance of an action.
+// Parameters:
+// - settings: A map[string]any which is persistently saved as a json for the action's instance.
 //
 // Usage:
 //
-//	e.LogMessage("Button was clicked!")
+//	newSettings := map[string]any{
+//		"apikey": "mX8ulcBHYmMniSshmB59"
+//	}
+//	e.SetSettings(newSettings)
 //
 // Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#logmessage
-func (e *ActionAssociatedEvent) LogMessage(message string) error {
-	response := LogMessageCommand{
-		Event: "logMessage",
+// https://docs.elgato.com/sdk/plugins/events-sent#setsettings
+func (e *ActionAssociatedEvent) SetSettings(settings map[string]any) error {
+	response := SetSettingsCommand{
+		Event:   "setSettings",
+		Context: e.Context,
+		Payload: settings,
+	}
+	return SendEventToStreamDeck(response)
+}
+
+// Sets the current state of an action instance.
+//
+// Usage:
+//
+//	e.SetState(1)
+//
+// Docs:
+// https://docs.elgato.com/sdk/plugins/events-sent#setstate
+func (e *ActionAssociatedEvent) SetState(state uint8) error {
+	response := SetStateCommand{
+		Event:   "setState",
+		Context: e.Context,
 		Payload: struct {
-			Message string "json:\"message\""
+			State uint8 "json:\"state\""
 		}{
-			Message: message,
+			State: state,
 		},
 	}
 	return SendEventToStreamDeck(response)
 }
 
-// Update the title displayed on the Stream Deck button.
+// Sets the title displayed for an instance of an action.
 //
 // Parameters:
 //   - title:   The new title to be displayed on the button.
@@ -242,47 +336,11 @@ func (e *ActionAssociatedEvent) SetTitle(title string, options ...uint8) error {
 	return SendEventToStreamDeck(response)
 }
 
-// Change the image displayed by an instance of an action:
-//
-// Usage:
-//
-//	e.SetImage("Button was clicked!")
-//
-// Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#setimage
-func (e *ActionAssociatedEvent) SetImage(base64image string, options ...uint8) error {
-	var target, state uint8 = 0, 0
-
-	if len(options) > 0 {
-		target = options[0]
-	}
-	if len(options) > 1 {
-		state = options[1]
-	}
-
-	response := SetImageCommand{
-		Event:   "setImage",
-		Context: e.Context,
-		Payload: struct {
-			Image  string "json:\"image\""
-			Target uint8  "json:\"target\""
-			State  uint8  "json:\"state\""
-		}{
-			Image:  base64image,
-			Target: target,
-			State:  state,
-		},
-	}
-	return SendEventToStreamDeck(response)
-}
-
-// !! SetFeedback
-
-// !! SetFeedbackLayout
-
 // !! SetTriggerDescription
 
-// Temporarily show an alert icon on the image displayed by an instance of an action:
+// Temporarily shows an alert (i.e. warning), in the form of an exclamation mark
+// in a yellow triangle, on the action instance. Used to provide visual feedback
+// when an action failed.
 //
 // Usage:
 //
@@ -298,7 +356,9 @@ func (e *ActionAssociatedEvent) ShowAlert() error {
 	return SendEventToStreamDeck(response)
 }
 
-// Temporarily show an OK checkmark icon on the image displayed by an instance of an action:
+// Temporarily shows an "OK" (i.e. success), in the form of a check-mark in a
+// green circle, on the action instance. Used to provide visual feedback when
+// an action successfully executed.
 //
 // Usage:
 //
@@ -314,28 +374,10 @@ func (e *ActionAssociatedEvent) ShowOk() error {
 	return SendEventToStreamDeck(response)
 }
 
-// Change the state of an action supporting multiple states:
+// Switches to the profile, as distributed by the plugin, on the specified device.
 //
-// Usage:
-//
-//	e.SetState(1)
-//
-// Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#setstate
-func (e *ActionAssociatedEvent) SetState(state uint8) error {
-	response := SetStateCommand{
-		Event:   "setState",
-		Context: e.Context,
-		Payload: struct {
-			State uint8 "json:\"state\""
-		}{
-			State: state,
-		},
-	}
-	return SendEventToStreamDeck(response)
-}
-
-// Switch to a preconfigured read-only profile:
+// NB: Plugins may only switch to profiles distributed with the plugin, as defined
+// within the manifest, and cannot access user-defined profiles.
 //
 // Usage:
 //
@@ -361,25 +403,6 @@ func (e *ActionAssociatedEvent) SwitchToProfile(profile string, page ...uint8) e
 			Profile: profile,
 			Page:    pageIndex,
 		},
-	}
-	return SendEventToStreamDeck(response)
-}
-
-// Send a payload to the Property Inspector:
-//
-// Usage:
-//
-//	e.SetState(map[string]any{}{
-//		"arbitrary": "value",
-//	})
-//
-// Docs:
-// https://docs.elgato.com/sdk/plugins/events-sent#sendtopropertyinspector
-func (e *ActionAssociatedEvent) SendToPropertyInspector(payload map[string]any) error {
-	response := SendToPropertyInspectorFromPluginCommand{
-		Event:   "sendToPropertyInspector",
-		Context: e.Context,
-		Payload: payload,
 	}
 	return SendEventToStreamDeck(response)
 }
