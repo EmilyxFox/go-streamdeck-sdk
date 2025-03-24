@@ -3,10 +3,12 @@ package streamdeck
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -100,4 +102,28 @@ func StartPlugin() {
 
 func RegisterAction(action Action) {
 	actionRegistry[action.GetUUID()] = action
+}
+
+func GetGlobalSettings() (GlobalSettings, error) {
+	ch := registerResponseChannel(PluginConfig.PluginUUID)
+	defer unregisterResponseChannel(PluginConfig.PluginUUID)
+
+	response := GetGlobalSettingsCommand{
+		Event:   "getGlobalSettings",
+		Context: PluginConfig.PluginUUID,
+	}
+	err := SendEventToStreamDeck(response)
+	if err != nil {
+		return nil, err
+	}
+
+	select {
+	case event := <-ch:
+		if settingsEvent, ok := event.(*DidReceiveGlobalSettingsEvent); ok {
+			return settingsEvent.Payload.Settings, nil
+		}
+		return nil, fmt.Errorf("unexpected response type")
+	case <-time.After(5 * time.Second):
+		return nil, fmt.Errorf("timeout waiting for global settings")
+	}
 }
